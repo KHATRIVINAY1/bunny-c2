@@ -8,7 +8,7 @@ function ClientLogs({userLogs}) {
             <ul className="space-y-2 text-sm font-mono">
                 {userLogs && userLogs.map((log, index) =>{
                     return(
-                        <li className={`text-${log.color}-600`} key={index}>[{log.alert}] {log.message}</li>
+                        <li  key={index} style={{color:log.color}}>[{log.alert}] {log.message}</li>
                         )
                         }
                     )}

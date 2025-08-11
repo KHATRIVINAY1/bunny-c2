@@ -14,12 +14,15 @@ class Client(models.Model):
     useragent = models.CharField(max_length=255, blank=True, null=True)
     antivirus = models.CharField(max_length=100, blank=True, null=True)
     computer = models.CharField(max_length=100, blank=True, null=True)
+    process= models.TextField(blank=True, null=True)
     status = models.CharField(
         max_length=8,
         choices=STATUS_CHOICES,
         blank=True,
         null=True
     )
+    last_seen = models.DateTimeField(auto_now=True)
+    sleep_time = models.IntegerField(default=0, blank=True, null=True)
 
     def __str__(self):
         return self.pcname or "Unnamed Client"

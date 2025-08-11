@@ -23,7 +23,7 @@ function CommandForm({id, addUserLogs}) {
         })
         .then(response => {
             if (response.ok) {
-                addUserLogs(id, 'green', 'SUCCESS', `Command sent: ${command}`);
+                addUserLogs(id, '#b1e250ff', 'SUCCESS', `Command sent: ${command}`);
             } else {
                 addUserLogs(id, 'red', 'ERROR', `Failed to send command: ${command}`);
             }
