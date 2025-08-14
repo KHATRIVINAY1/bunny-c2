@@ -60,7 +60,7 @@ Cargo.lock
 # If using rustup
 /.cargo/
 /rustup/
-
+server/backend/ClientsData/
 # IDEs
 .idea/
 *.rs.bk

