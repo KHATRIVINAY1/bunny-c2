@@ -48,9 +48,6 @@ pub fn is_elevated() -> bool {
     }
 }
 
-
-
-
 pub fn basic_info() ->BasicInfo{
         let username = whoami::username();
         let realname = whoami::realname();
@@ -65,8 +62,6 @@ pub fn basic_info() ->BasicInfo{
         if is_elevated() {
             admin = true;
         }
-
-        
 
         let info = BasicInfo {
                         name: format!("{}/({})", username, hostname),

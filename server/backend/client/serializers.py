@@ -7,7 +7,7 @@ class ClientSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
     class Meta:
         model = Client
-        fields = ['id', 'pcname', 'ip', 'location', 'access', 'useragent', 'antivirus', 'computer', 'status']
+        fields = ['id', 'pcname', 'ip', 'location', 'access', 'useragent', 'antivirus', 'computer', 'status','process']
         read_only_fields = ['id']
     
     def get_status(self, obj):

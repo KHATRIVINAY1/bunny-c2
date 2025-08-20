@@ -1,8 +1,10 @@
-import React, {useState} from 'react';
+import React, { useEffect, useState} from 'react';
 import useFetch from '../hooks/useFetch';
 
 function EditUsers({id, pcname,computer, antivirus, handelEditUser }) {
     const [form,setForm] = useState({ pcname: pcname || '',computer: computer || '', antivirus: antivirus || ''});
+    const [tab, setTab] = useState('detail');
+    const [processes, setProcesses] = useState('No Processes');
     const putData = useFetch;
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -11,6 +13,8 @@ function EditUsers({id, pcname,computer, antivirus, handelEditUser }) {
             [name]: value
         }));
     }
+
+    
 
     const [infoMessage, setinfoMessage] = useState({
                                                         color: 'blue',  
@@ -48,7 +52,25 @@ function EditUsers({id, pcname,computer, antivirus, handelEditUser }) {
                         message: 'Failed to update client details.'
                     });});
                 }
-
+        
+        useEffect(
+            () => {
+                const fetchProcesses = async () => {
+                    try {
+                        const response = await fetch(`http://localhost/api/clients/${id}/`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            setProcesses(data.process || 'No Processes');
+                        } else {
+                            setProcesses('Failed to fetch processes');
+                        }
+                    } catch (error) {
+                        setProcesses('Error fetching processes');
+                    }
+                };
+                fetchProcesses();
+            }
+            ,[])
 
     return (<>
         
@@ -57,14 +79,26 @@ function EditUsers({id, pcname,computer, antivirus, handelEditUser }) {
             style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' , height: '100%' }}
             >
                 
-                <div className="relative p-4 w-full max-w-md max-h-full">
+                <div className="relative p-4 w-full max-h-full">
                     
                     <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
-                        
-                        <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                Update User Details
-                            </h3>
+                        <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200 sticky top-0 z-10 bg-white dark:bg-gray-700">
+                           <div className="border-b border-gray-200 dark:border-gray-700">
+                            <ul className="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400">
+                                <li className="me-2">
+                                    <a href="#" onClick={()=>setTab('detail')} className="inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group">
+                                       Detail
+                                    </a>
+                                </li>
+                                <li className="me-2">
+                                    <a href="#" onClick={()=>setTab('process')} className="inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group">
+                                        Process
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                        </div>
+
                             <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="crud-modal"
                                 onClick={() => handelEditUser(null)}
                             >
@@ -74,7 +108,8 @@ function EditUsers({id, pcname,computer, antivirus, handelEditUser }) {
                                 <span className="sr-only">Close modal</span>
                             </button>
                         </div>
-                        <div className= {`bg-${infoMessage.color}-100 border-t border-b border-${infoMessage.color}-500 text-${infoMessage.color}-700 px-4 py-3`} >
+                        
+                        {tab == 'detail' && (<><div className= {`bg-${infoMessage.color}-100 border-t border-b border-${infoMessage.color}-500 text-${infoMessage.color}-700 px-4 py-3`} >
                             <p className="font-bold">{infoMessage.header}</p>
                             <p className="text-sm">{infoMessage.message}</p>
                         </div>
@@ -108,7 +143,13 @@ function EditUsers({id, pcname,computer, antivirus, handelEditUser }) {
                                 className="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                                 Update
                             </button>
-                        </form>
+                        </form></>)}
+
+                        {tab == 'process' && (
+                           <pre className='p-4'>
+                                {processes}
+                           </pre>
+                        )}
                     </div>
                 </div>
         </div> 

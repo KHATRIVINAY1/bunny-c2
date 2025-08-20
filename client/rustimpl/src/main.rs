@@ -20,9 +20,6 @@ struct Response2{
     result:String
 }
 
-
-
-
 const  url:&str = "http://localhost/api/compromised-machine/";
 
 fn main() {
