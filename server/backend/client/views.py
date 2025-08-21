@@ -239,7 +239,7 @@ class CommandResponse(APIView):
             with open(file_path, "r", encoding="utf-8") as file:
                 data = file.read()
 
-            return Response({'data':data, 'title':id+ " : " +command.result}, status=200)
+            return Response({'data':data, 'title':id+ " : " +command.result, 'command':command.command}, status=200)
 
         except Exception as ex:
             return Response({'data':f'No Data Found'}, status=404)

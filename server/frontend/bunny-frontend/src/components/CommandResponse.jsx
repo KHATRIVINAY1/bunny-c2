@@ -30,7 +30,7 @@ function CommandResponse({ id, handleResponseModal }) {
 
                 {/* Body */}
                 <div className="max-h-[70vh] overflow-y-auto overflow-x-auto border rounded p-2 bg-gray-50">
-                    <pre className="whitespace-pre-wrap">{response.data}</pre>
+                    { response.command == 'screenshot'?<img src={`data:image/png;base64,${response.data}`} alt='It might get corrupted' />:<pre className="whitespace-pre-wrap">{response.data}</pre>   }              
                 </div>
 
                 {/* Footer */}
