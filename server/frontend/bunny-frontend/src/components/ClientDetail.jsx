@@ -1,12 +1,31 @@
-import React, {useEffect} from 'react'
+import React, {use, useEffect, useState} from 'react'
 import useFetch from '../hooks/useFetch';
 import {Eye, Hourglass, EyeClosed, CheckCheck} from 'lucide-react';
 import ClientLogs from './ClientLogs';
 
 export const ClientDetail = ({tabId, pcName, username, userLogs, handleResponseModal}) => {
   console.log('userLoigs', userLogs?.tabId);
-  const userCommands = useFetch(`http://localhost/api/client-commands/${tabId}/`, [tabId]);
+  const [userCommands, setUserCommands ]= useState([]);
 
+  useEffect(()=>{
+          const fetchUsers= async()=>{
+              const result = await  fetch(
+                  `http://localhost/api/client-commands/${tabId}/`,{ method: 'GET' } );
+              const data = await result.json();
+              setUserCommands(data);
+          }
+          fetchUsers();
+          let interval;
+            if (tabId) {
+                interval = setInterval(fetchUsers, 2000);
+            }
+
+            return () => {
+                if (interval) clearInterval(interval);
+            };
+           
+          }
+         , [tabId])
 
   return (
     <div className="mt-1 p-1 bg-gray-50 rounded h-50 overflow-y-auto resize overflow-x-auto flex">

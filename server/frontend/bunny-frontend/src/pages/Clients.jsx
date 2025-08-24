@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Search, Terminal ,Edit} from 'lucide-react';
 import ClientTab from '../components/ClientTab';
 import useFetch from '../hooks/useFetch';
@@ -7,7 +7,7 @@ import EditUsers from '../components/EditUsers';
 import CommandResponse from '../components/CommandResponse';
 
 function Clients() {
-    const users =useFetch('http://localhost/api/clients/',["http://localhost/api/clients/"])||[];
+    const [users, setUsers] = useState([]);
     const [editUser, setEditUser] = useState(null);
     const [responseModal, setResponseModal] = useState(null);
     const [searchUsers, setSearchUsers] = useState('');
@@ -15,6 +15,21 @@ function Clients() {
     const [tabs, setTabs] = useState([]);
     const [acticeTab, setActiveTab] = useState(null);
     const [userLogs , setUserLogs]= useState(null);
+
+    useEffect(()=>{
+
+        const fetchUsers= async()=>{
+            const result = await  fetch(
+                'http://localhost/api/clients/',{ method: 'GET' } );
+            const data = await result.json();
+            setUsers(data);
+        }
+        fetchUsers();
+         const interval = setInterval(fetchUsers, 10000);
+         return () => clearInterval(interval);
+        }
+       , [])
+
     
     const addUserLogs = (tabId,color='green', alert='SUCCESS',message="Something") => {
         if (userLogs == null){
