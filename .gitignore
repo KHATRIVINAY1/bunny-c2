@@ -56,7 +56,7 @@ client/rustimpl/target/
 /target/
 **/*.rs.bk
 Cargo.lock
-
+client/rustimpl/src/bin/
 # If using rustup
 /.cargo/
 /rustup/

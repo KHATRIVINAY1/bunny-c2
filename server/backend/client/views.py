@@ -188,6 +188,8 @@ class CompromisedMachine(APIView):
                 target_dir = os.path.join(target_dir, "files")
             elif type == "list":
                 target_dir = os.path.join(target_dir, "list")
+            elif type == "shell":
+                target_dir = os.path.join(target_dir, "shell")
 
             if not os.path.exists(target_dir):
                 os.makedirs(target_dir)
@@ -252,6 +254,8 @@ class CommandResponse(APIView):
                 target_dir = os.path.join(target_dir, "files") 
             elif command.command.startswith("list"):
                 target_dir = os.path.join(target_dir, "list")
+            elif command.command.startswith("shell"):
+                target_dir = os.path.join(target_dir, "shell")
 
             file_path = os.path.join(target_dir, f"{command.id}.{extension}")
             with open(file_path, "r", encoding="utf-8") as file:
