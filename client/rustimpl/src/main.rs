@@ -4,6 +4,7 @@ mod utils;
 mod processCommand;
 mod listdir;
 mod screencapture;
+mod shell;
 
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
