@@ -5,6 +5,13 @@ from .models import Client, Command
 from rest_framework.response import Response
 import os
 from django.conf import settings
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import login
+from .serializers import LoginSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+
 # Create your views here.
 
 ANTIVIRUS_PROCESSES = {
@@ -52,6 +59,8 @@ ANTIVIRUS_PROCESSES = {
 
 class ClientListView(APIView):
     serializer_class = ClientSerializer
+    permission_classes = (IsAuthenticated,)
+    
     def get(self, request):
         clients = Client.objects.all().order_by('-last_seen')
         serializer = self.serializer_class(clients, many=True)
@@ -265,3 +274,22 @@ class CommandResponse(APIView):
 
         except Exception as ex:
             return Response({'data':f'No Data Found' , 'title':id+ " : " +command.result}, status=404)
+        
+
+class LoginView(APIView):
+    serilizer_class = LoginSerializer
+    permission_classes  = ([AllowAny])
+
+    def post(self, request):
+        serializer = self.serilizer_class(data=request.data)
+    
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            refresh = RefreshToken.for_user(user)
+            
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }, status=200)
+        
+        return Response(serializer.errors, status=400)

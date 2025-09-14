@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, BarChart3, Users,Settings,FileText, Menu, X,LogOut} from 'lucide-react';
 
-function Sidebar() {
+function Sidebar(props) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     // const location = useLocation();
 
@@ -72,6 +72,8 @@ function Sidebar() {
             {/* logout button */}
             <div className='p-4 border-t border-slate-700'>
                 <button
+
+                    onClick={props.logout}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group hover:bg-red-600 text-slate-300 hover:text-white w-full"
                 >
                     {!isCollapsed && (

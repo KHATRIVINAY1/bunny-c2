@@ -19,8 +19,12 @@ function Clients() {
     useEffect(()=>{
 
         const fetchUsers= async()=>{
+            const token = localStorage.getItem('access_token');
             const result = await  fetch(
-                'http://localhost/api/clients/',{ method: 'GET' } );
+                'http://localhost/api/clients/',{ method: 'GET' ,headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : ''
+                }, } );
             const data = await result.json();
             setUsers(data);
         }
