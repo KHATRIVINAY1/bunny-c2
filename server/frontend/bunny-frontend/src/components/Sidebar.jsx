@@ -7,7 +7,7 @@ function Sidebar(props) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     // const location = useLocation();
 
-    let user = {'name':'Vinay','avatar':'https://techshark.io/media/tool_logo/Voc_AI_Logo.jpg', 'email':'khatrivinay1@gmail.com'}
+    let user = {'name':'Admin','avatar':'http://localhost/static/images/user.png', 'email':'admin@admin.com'}
 
     const menuItems = [
             { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },

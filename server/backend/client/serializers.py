@@ -24,7 +24,7 @@ class ClientSerializer(serializers.ModelSerializer):
 class CommandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Command
-        fields = ['id', 'client', 'command', 'timestamp', 'status', 'read']
+        fields = ['id', 'client', 'command', 'timestamp', 'status', 'read', 'temp']
         read_only_fields = ['id', 'timestamp']
 
 

