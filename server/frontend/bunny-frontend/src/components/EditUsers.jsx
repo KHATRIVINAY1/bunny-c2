@@ -6,6 +6,8 @@ function EditUsers({id, pcname,computer, antivirus, handelEditUser }) {
     const [form,setForm] = useState({ pcname: pcname || '',computer: computer || '', antivirus: antivirus || ''});
     const [tab, setTab] = useState('detail');
     const [processes, setProcesses] = useState('No Processes');
+    const [files, setFiles] = useState(null);
+    const [dirHistory, setDirHistory] = useState([]); // Stack to keep track of directory history
     const putData = useFetch;
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -158,7 +160,13 @@ function EditUsers({id, pcname,computer, antivirus, handelEditUser }) {
                            </pre>
                         )}
                         {tab == 'files' && (
-                           <UserFiles id={id}></UserFiles>
+                           <UserFiles   id={id} 
+                                        files={files} 
+                                        setFiles={setFiles}
+                                        dirHistory={dirHistory}
+                                        setDirHistory={setDirHistory}
+                                        >
+                            </UserFiles>
                         )}
                     </div>
                 </div>

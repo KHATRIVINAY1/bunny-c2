@@ -58,14 +58,23 @@ pub fn list_dir_travel(path: &str) -> (String, String) {
         return (data, message);
     }
 
-    // Normal directory listing
     match fs::read_dir(path) {
         Ok(entries) => {
             for entry in entries {
                 if let Ok(entry) = entry {
                     let path_buf = entry.path();
                     let file_name = entry.file_name().to_string_lossy().to_string();
-                    let entry_type = if path_buf.is_dir() { "directory" } else { "file" };
+                    let metadata = match entry.metadata() {
+                        Ok(m) => m,
+                        Err(_) => continue, // skip if metadata can't be read
+                    };
+
+                    let entry_type = if metadata.is_dir() { "directory" } else { "file" };
+                    let file_size = if metadata.is_file() {
+                        metadata.len()  // size in bytes
+                    } else {
+                        0
+                    };
 
                     if !first {
                         data.push(',');
@@ -73,10 +82,11 @@ pub fn list_dir_travel(path: &str) -> (String, String) {
                     first = false;
 
                     data.push_str(&format!(
-                        "{{\"name\":\"{}\",\"path\":\"{}\",\"entry_type\":\"{}\"}}",
+                        "{{\"name\":\"{}\",\"path\":\"{}\",\"entry_type\":\"{}\",\"size\":{}}}",
                         file_name,
                         path_buf.display(),
-                        entry_type
+                        entry_type,
+                        file_size
                     ));
                 }
             }
@@ -86,6 +96,7 @@ pub fn list_dir_travel(path: &str) -> (String, String) {
         }
     }
 
+   
     data.push_str("]}");
     data = data.replace("\\", "\\\\");
     message= data.clone();

