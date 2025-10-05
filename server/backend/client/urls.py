@@ -10,5 +10,5 @@ urlpatterns = [
     path('client-commands/<str:client_id>/', ClientCommand.as_view(), name='client-commands'),
     path("command-response/<str:id>", CommandResponse.as_view(), name="command-response"),
     path('compromised-machine/', CompromisedMachine.as_view(), name='compromised-machine'),
-    path("command-response-by-command/<int:client_id>/<str:command>/", CommandResponseByCommand.as_view(), name="command-response-by-command"),
+    path("command-response-by-command/", CommandResponseByCommand.as_view(), name="command-response-by-command"),
 ]

@@ -305,8 +305,9 @@ class LoginView(APIView):
         return Response(serializer.errors, status=400)
 
 class CommandResponseByCommand(APIView):
-    def get(self, request, client_id, command):
+    def post(self, request):
         try:
+            client_id, command = request.data.get('client'), request.data.get('command')
             command_obj = Command.objects.filter(client=client_id, command=command).order_by('-timestamp').first()
             if not command_obj:
                 return Response({'data': 'No Data Found', 'title': 'No Data', 'result': 'No Result'}, status=404)
@@ -335,8 +336,10 @@ class CommandResponseByCommand(APIView):
                     data = json.loads(file.read())
                 else:
                     data = file.read()
+            
+            serilizer = CommandSerializer(command_obj)
 
-            return Response({'data':data, 'title':str(command_obj.id)+ " : " +command_obj.result, 'command':command_obj.command,'result':command_obj.result}, status=200)
+            return Response(serilizer.data, status=200)
 
         except Exception as ex:
             print(ex)

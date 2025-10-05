@@ -6,6 +6,17 @@ import { ArrowUp,Folder , Download } from "lucide-react";
 
 async function sendFileCommand(data) {
   const url = "http://localhost/api/commands/";
+  const cache_url= "http://localhost/api/command-response-by-command/"
+
+  try {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    const response = await axios.post(cache_url, data, { headers });
+    return response.data;
+  } catch (error) {
+  }
+
   try {
     const headers = {
       "Content-Type": "application/json",
