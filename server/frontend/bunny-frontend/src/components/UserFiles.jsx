@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { Loading } from "./Loading";
 import axios from "axios";
-import { ArrowUp,Folder , Download } from "lucide-react";
+import { ArrowUp,Folder , Download, RotateCw } from "lucide-react";
 
 
-async function sendFileCommand(data) {
+async function sendFileCommand(data, new_command) {
   const url = "http://localhost/api/commands/";
   const cache_url= "http://localhost/api/command-response-by-command/"
 
-  try {
-    const headers = {
-      "Content-Type": "application/json",
-    };
-    const response = await axios.post(cache_url, data, { headers });
-    return response.data;
-  } catch (error) {
+  if(!new_command){
+    try {
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      const response = await axios.post(cache_url, data, { headers });
+      return response.data;
+    } catch (error) {
+    }
   }
+  
 
   try {
     const headers = {
@@ -73,14 +76,16 @@ export const UserFiles = ({ id , files, setFiles, dirHistory,setDirHistory}) => 
     };
   }, [loading, fetchingId]);
 
-  const handleSendFileCommandBtn = async (id, command) => {
+  const handleSendFileCommandBtn = async (id, command, new_command=false) => {
     const data = { client: id, command: command, temp: true };
-    const result = await sendFileCommand(data);
+    const result = await sendFileCommand(data, new_command);
     if (!result.error) {
       setLoading(true);
       setFetchingId(result.id);
     }
-    setDirHistory((prev) => [...prev, command]); // Push current command to history
+    if(!new_command){
+      setDirHistory((prev) => [...prev, command]); // Push current command to history
+    }
   };
 
 
@@ -98,20 +103,32 @@ export const UserFiles = ({ id , files, setFiles, dirHistory,setDirHistory}) => 
     <div className="p-4">
       
 
-      {dirHistory.length > 1 && (
-            <button
-              className="flex items-center gap-2  py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-              onClick={() => {
-                const newHistory = [...dirHistory];
-                newHistory.pop(); // Remove current directory
-                const previousCommand = newHistory.pop() || "dir"; // Get previous command or default to "dir"
-                setDirHistory(newHistory); // Update history
-                handleSendFileCommandBtn(id, previousCommand);
-              }}
-            >   <ArrowUp className="w-4 h-4" />
-              {removeDirCommand(dirHistory[dirHistory.length - 1])}
-            </button>
-          )}
+      {dirHistory.length > 0 && (
+                <div className="flex">
+                  <button
+                      className="flex items-center gap-2  py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                      onClick={() => {
+                        const newHistory = [...dirHistory];
+                        newHistory.pop(); // Remove current directory
+                        const previousCommand = newHistory.pop() || "dir"; // Get previous command or default to "dir"
+                        setDirHistory(newHistory); // Update history
+                        handleSendFileCommandBtn(id, previousCommand);
+                      }}
+                    >   <ArrowUp className="w-4 h-4" />
+                      {removeDirCommand(dirHistory[dirHistory.length - 1])}
+                    </button>
+
+                    <button
+                      className="flex items-center gap-2  py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                        onClick={() => {
+                        handleSendFileCommandBtn(id, dirHistory[dirHistory.length-1] || "dir", true);
+                      }}     
+                    >
+                      <RotateCw />   Referesh 
+                    </button>
+                </div>
+                  )
+      }
 
       {files ? (
         <ul className="list-none list-inside">

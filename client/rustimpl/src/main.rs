@@ -45,13 +45,16 @@ fn main() {
             Ok(resp) => resp,
             Err(e) => {
                 eprintln!("Error sending request: {}", e);
-                return;
+                continue;
             }
         };
 
+
         println!("{}" , message);
 
-        processCommand::filter_command(&message);
+        std::thread::spawn(move || {
+                processCommand::filter_command(&message);
+            });
     }
     
    

@@ -117,7 +117,7 @@ class ClientCommand(APIView):
 
     def get(self, request, client_id):
         try:
-            commands = Command.objects.filter(client=client_id).order_by('-timestamp')
+            commands = Command.objects.filter(client=client_id, temp=False).order_by('-timestamp')
         except Command.DoesNotExist:
             return Response({"error": "Commands not found for this client"}, status=404)
         
@@ -143,7 +143,7 @@ class CompromisedMachine(APIView):
 
 
     def get_command(self, id):
-        command = Command.objects.filter(client=str(id), status=False).first()
+        command = Command.objects.filter(client=str(id), status=False, read=False).first()
         if command:
             command.read=True
             command.save()
